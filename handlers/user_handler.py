@@ -21,11 +21,12 @@ async def delete_obj(*args):
 
 @router.callback_query(F.data == "order_add")
 async def add_order_handler(call: types.CallbackQuery, state: FSMContext):
-    answer = "Введите заказ через запятую и поставьте точку в конце"
-    menu = bot_ikb.exit
-    await state.set_state(AddOrderState.wait)
     await state.update_data(alert_msg = None)
-    await sendel_msg(call, answer, menu, stickers.add)
+    await sendel_msg(
+                     call,
+                     "Введите заказ через запятую и поставьте точку в конце",
+                     bot_ikb.exit,
+                     stickers.add)
     
 @router.message(AddOrderState.wait ,F.text)
 async def add_order_wait(msg: types.Message, state: FSMContext):
@@ -94,48 +95,32 @@ async def orders_list_handler(call: types.CallbackQuery, state: FSMContext):
     await sendel_msg(call, answer, menu, stick)
     
     
-@router.callback_query(EditOrdersState.choose, F.data == "prev_page")
-async def prev_page_orders(call: types.CallbackQuery, state: FSMContext):
+@router.callback_query(EditOrdersState.choose, F.data.in_({"prev_page", "next_page"}))
+async def page_navigate_orders(call: types.CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     orders = state_data['orders']
     user = state_data['user']
     cur_ord_id = state_data['current_order_id']
-    if cur_ord_id-1 >= 0:
-        cur_ord_id -= 1
-        order = orders[cur_ord_id]
-        await state.update_data(order = order)
-        answer = user_formatter.user_order(
-                                order, 
-                                user['username'])
-        menu = bot_ikb.get_orders_editor(
-                   'start' if cur_ord_id == 0 else 'middle')
-    else:
-        logger.error("Айди не может быть меньше 0")
-        return
-        
-    await state.update_data(current_order_id = cur_ord_id)
-    await call.message.edit_text(answer, parse_mode="HTML", reply_markup=menu)
-    
-   
-@router.callback_query(EditOrdersState.choose, F.data == "next_page")
-async def prev_page_orders(call: types.CallbackQuery, state: FSMContext):
-    state_data = await state.get_data()
-    orders = state_data['orders']
-    user = state_data['user']
-    cur_ord_id = state_data['current_order_id']
-    if cur_ord_id+2 <= len(orders):
-        cur_ord_id += 1
-        order = orders[cur_ord_id]
-        await state.update_data(order = order)
-        answer = user_formatter.user_order(
-                                order,
-                                user['username'])
-        menu = bot_ikb.get_orders_editor(
-                   'end' if cur_ord_id+1 == len(orders) else 'middle')
-    else:
-        logger.error("Айди не может быть больше длины списка")
-        return
-        
+    match call.data:
+        case "prev_page":
+            if cur_ord_id-1 >= 0:
+                cur_ord_id -= 1
+                menu = bot_ikb.get_orders_editor(
+                           'start' if cur_ord_id == 0 else 'middle')
+            else:
+                logger.error("Айди не может быть меньше 0")
+                return
+        case "next_page":
+            if cur_ord_id+2 <= len(orders):
+                cur_ord_id += 1
+                menu = bot_ikb.get_orders_editor(
+                           'end' if cur_ord_id+1 == len(orders) else 'middle')
+            else:
+                logger.error("Айди не может быть больше длины списка")
+                return
+    order = orders[cur_ord_id]
+    await state.update_data(order = order)
+    answer = user_formatter.user_order(order, user['username'])
     await state.update_data(current_order_id = cur_ord_id)
     await call.message.edit_text(answer, parse_mode="HTML", reply_markup=menu)
     
@@ -166,13 +151,6 @@ async def edit_order_input(msg: types.Message, state: FSMContext):
     await state.set_state(EditOrdersState.confirm)
     await msg.delete()
     await sendel_msg(msg, answer, menu, stick)
-    
-    
-    
-@router.callback_query(EditOrdersState.edit, F.data == "back")
-async def edit_order_back(call: types.CallbackQuery, state: FSMContext):
-    await state.clear()
-    await orders_list_handler(call, state)
     
     
 @router.callback_query(EditOrdersState.confirm, F.data == "confirm")
@@ -208,8 +186,13 @@ async def u_del_order_confirm(call: types.CallbackQuery, state: FSMContext):
     await sendel_msg(call, answer, menu, stick)
     
     
-#@router.callback_query(EditOrdersState.confirm, F.data == "")
-@router.callback_query(StateFilter(EditOrdersState.delete, EditOrdersState.confirm), F.data.in_({"cancel", "back"}))
+@router.callback_query(StateFilter(
+                        EditOrdersState.delete,
+                        EditOrdersState.edit,
+                        EditOrdersState.confirm),
+                       F.data.in_({
+                        "cancel",
+                        "back"}))
 async def edit_ord_cancel_back(call: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await orders_list_handler(call, state)
