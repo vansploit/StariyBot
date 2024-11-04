@@ -10,3 +10,15 @@ class EditOrdersState(StatesGroup):
     edit = State()
     delete = State()
     confirm = State()
+    
+class AcceptOrderState(StatesGroup):
+    choose = State()
+    ready = State()
+    confirm = State()
+    
+  
+class EditAcceptedState(StatesGroup):
+    choose = State()
+    ready = State()
+    throw = State()
+    confirm = State()

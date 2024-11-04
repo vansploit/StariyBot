@@ -1,18 +1,11 @@
-from aiogram import Router, F, types
-from aiogram.filters import Command
-from aiogram.types import Message
+from . import *
 
-import config
-from text import admin_formatter, pre_texts
+from config import admins
 
-BotDB = None
-bot = None
-sendel_msg = None
-bot_ikb = None
-logger = None
+from text import admin_formatter
 
 router = Router()
-router.message.filter(F.from_user.id.in_(set(config.admins)))
+router.message.filter(F.from_user.id.in_(set(admins)))
 
 @router.message(Command("admin"))
 async def message_with_text(msg: Message):

@@ -1,7 +1,8 @@
 import sqlite3
 import datetime
 import pytz
-import logging
+
+from bot_logger import logger
 
 class MyDatabase:
     
@@ -188,7 +189,7 @@ class MyDatabase:
         self._disconnect()
         return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
         
-        
+    #функция для удаления пользователя
     def delete_user(self, telegram_id):
         self._connect()
         self._cursor.execute('''
@@ -197,7 +198,7 @@ class MyDatabase:
         self._logger.info(f"Удален пользователь с telegram_id: {telegram_id}")
         self._disconnect()
         
-        
+    #функция удаления заказа
     def delete_order(self, order_id):
         self._connect()
         self._cursor.execute('''
@@ -206,12 +207,12 @@ class MyDatabase:
         self._logger.info(f"Удален заказ с id: {order_id}")
         self._disconnect()        
         
-        
+    #проверка является ли пользователь администратором
     def is_admin(self, telegram_id):
         user = self.get_user(telegram_id)
         return user is not None and user[4] == 'admin'  # privilege
 
-
+    #проверка на наличие пользователя в бд
     def user_exists(self, telegram_id):
         self._connect()
         self._cursor.execute('''
@@ -219,10 +220,9 @@ class MyDatabase:
         ''', (telegram_id,))
         exists = self._cursor.fetchone()[0] > 0
         self._disconnect()
-        self._logger.info(exists)
         return exists
 
-
+    #возвращает не готовые заказы
     def get_unfinished_orders(self):
         self._connect()
         self._cursor.execute('''
@@ -230,9 +230,9 @@ class MyDatabase:
         ''')
         orders = self._cursor.fetchall()
         self._disconnect()
-        return orders
+        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
 
-
+    #возвращает готовые заказы
     def get_finished_orders(self):
         self._connect()
         self._cursor.execute('''
@@ -240,7 +240,36 @@ class MyDatabase:
         ''')
         orders = self._cursor.fetchall()
         self._disconnect()
-        return orders
+        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        
+        
+    def finish_order(self, order_id):
+        self.update_order(order_id, ready = True)
+        
+        
+    def get_picked_orders_by_user(self, user_id):
+        self._connect()
+        self._cursor.execute('''
+            SELECT * FROM Orders WHERE exec_id = ? AND ready = FALSE
+        ''', (user_id,))
+        orders = self._cursor.fetchall()
+        self._disconnect()
+        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        
+    #функция возвращает заказы без исполнителя
+    def get_not_picked_orders(self):
+        self._connect()
+        self._cursor.execute('''
+            SELECT * FROM Orders WHERE exec_id IS NULL
+        ''')
+        orders = self._cursor.fetchall()
+        logger.info(orders)
+        self._disconnect()
+        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        
+    #функция для сохранения исполнителя для заказа
+    def set_picked_order(self, order_id, user_id):
+        self.update_order(order_id, exec_id = user_id)
         
         
     def ban_user(self, telegram_id, duration_in_seconds):
@@ -271,3 +300,5 @@ class MyDatabase:
         ban_expiry_time = ban_time + datetime.timedelta(seconds=ban_duration)
 
         return current_time < ban_expiry_time  # Если текущее время меньше времени истечения, пользователь все еще забанен
+        
+BotDB = MyDatabase(logger) 

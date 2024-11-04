@@ -33,3 +33,6 @@ class BotLogger:
         self.logger.addHandler(self._info_handler)
         self.logger.addHandler(self._debug_handler)
         self.logger.addHandler(self._console_handler)
+        
+BotLog = BotLogger()
+logger = BotLog.logger

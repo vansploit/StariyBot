@@ -1,5 +1,7 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from bot_logger import logger
+
 class BotInlineKB:
     def __init__(self, logger):
         self._logger = logger
@@ -17,7 +19,7 @@ class BotInlineKB:
         builder.button(text="✏️Заказать", callback_data="order_add")
         builder.button(text="📋Мои заказы", callback_data="orders_list")
         builder.button(text="🛒Взять заказ", callback_data = "get_order")
-        builder.button(text="📘Приняте заказы", callback_data = "all_accepted_orders")
+        builder.button(text="📘Принятые заказы", callback_data = "accepted_orders")
         builder.adjust(1, 2, 1, 1)
         return builder.as_markup()
         
@@ -50,27 +52,23 @@ class BotInlineKB:
         
     def _get_pages(self, page):
         builder = InlineKeyboardBuilder()
-        if page == 'start':
-            builder.button(
-                text="#",
-                callback_data="empty")
-            builder.button(
-                text=">>>",
-                callback_data="next_page")
-        elif page == 'end':
-            builder.button(
-                text="<<<",
-                callback_data="prev_page")
-            builder.button(
-                text="#",
-                callback_data="empty")
-        else:
-            builder.button(
-                text="<<<",
-                callback_data="prev_page")
-            builder.button(
-                text=">>>",
-                callback_data="next_page")
+        text1, text2 = "#", "#"
+        cb_data1, cb_data2 = "empty", "empty"
+        match page:
+            case 'start':
+                text2,cb_data2 = ">>>", "next_page"
+            case 'end':
+                text1, cb_data1 = "<<<", "prev_page"
+            case 'middle':
+                text1, cb_data1 = "<<<", "prev_page"
+                text2, cb_data2 = ">>>", "next_page"
+                
+        builder.button(
+                text=text1,
+                callback_data=cb_data1)
+        builder.button(
+                text=text2,
+                callback_data=cb_data2)
         builder.adjust(2)
         return builder
         
@@ -81,7 +79,7 @@ class BotInlineKB:
         builder.adjust(2)
         return builder.as_markup()
         
-    def get_orders_editor(self, page='middle'):
+    def get_orders_editor(self, page = ''):
         builder = InlineKeyboardBuilder()
         builder.attach(self._get_pages(page))
         builder.button(text="⚙️Изменить", callback_data="edit_order")
@@ -89,3 +87,25 @@ class BotInlineKB:
         builder.attach(InlineKeyboardBuilder.from_markup(self.exit))
         builder.adjust(2, 2, 1)
         return builder.as_markup()
+        
+        
+    def get_accept_menu(self, page = ''):
+        builder = InlineKeyboardBuilder()
+        builder.attach(self._get_pages(page))
+        builder.button(text="Принять", callback_data="accept_order")
+        builder.attach(InlineKeyboardBuilder.from_markup(self.exit))
+        builder.adjust(2, 1, 1)
+        return builder.as_markup()
+        
+        
+    def get_accepted_menu(self, page = ''):
+        builder = InlineKeyboardBuilder()
+        builder.attach(self._get_pages(page))
+        builder.button(text="Готов", callback_data="order_ready")
+        builder.button(text="Отказаться", callback_data="throw_order")
+        builder.attach(InlineKeyboardBuilder.from_markup(self.exit))
+        builder.adjust(2, 2, 1)
+        return builder.as_markup()
+        
+        
+bot_ikb = BotInlineKB(logger)   

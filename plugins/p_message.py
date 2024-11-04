@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.types import Message
 from aiogram.exceptions import TelegramBadRequest
 
-logger = None
+from bot_logger import logger
 
 user_last_sticker = {}
 user_last_message = {}

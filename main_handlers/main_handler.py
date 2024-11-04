@@ -1,16 +1,6 @@
-from aiogram import Router, F, types
-from aiogram.filters import Command, StateFilter
-from aiogram.types import Message
-from aiogram.fsm.context import FSMContext
+from . import *
 
 from config import admins
-from text import stickers
-
-BotDB = None
-bot = None
-sendel_msg = None
-bot_ikb = None
-logger = None
 
 router = Router()
 
