@@ -2,6 +2,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 
 import config
+
 from handlers import main_handler, admin_handler, user_handler
 
 from plugins import p_message
@@ -16,7 +17,7 @@ BotBD = db_bot.MyDatabase(logger)
 
 bot_ikb = BotInlineKB(logger)
 p_message.logger = logger
-
+ 
 # Функция для настройки обработчиков
 def setup_handlers(bot, handlers):
     for handler in handlers:
