@@ -19,14 +19,14 @@ async def navigate_accepted_orders(call: types.CallbackQuery, state: FSMContext)
     
     order = orders[cur_ord_id]
     await state.update_data(order = order)
-    answer = user_formatter.user_order(order, user['username'])
+    answer = user_formatter.user_order(order, user.username)
     await state.update_data(current_order_id = cur_ord_id)
     await call.message.edit_text(answer, parse_mode="HTML", reply_markup=menu)
     
     
 @router.callback_query(EditAcceptedState.choose, F.data == "order_ready")
 async def order_get_ready(call: types.CallbackQuery, state: FSMContext):
-    _id = (await state.get_data())['order']['id']
+    _id = (await state.get_data())['order'].id
     await state.set_state(EditAcceptedState.ready)
     await sendel_msg(
                      call,
@@ -36,7 +36,7 @@ async def order_get_ready(call: types.CallbackQuery, state: FSMContext):
                      
 @router.callback_query(EditAcceptedState.choose, F.data == "throw_order")
 async def throw_order(call: types.CallbackQuery, state: FSMContext):
-    _id = (await state.get_data())['order']['id']
+    _id = (await state.get_data())['order'].id
     await state.set_state(EditAcceptedState.throw)
     await sendel_msg(
                      call,
@@ -47,8 +47,7 @@ async def throw_order(call: types.CallbackQuery, state: FSMContext):
                      
 @router.callback_query(EditAcceptedState.throw, F.data == "confirm")
 async def throw_order_confirm(call: types.CallbackQuery, state: FSMContext):
-    order = (await state.get_data())['order']
-    _id = order['id']
+    _id = (await state.get_data())['order'].id
     BotDB.update_order(_id, exec_id = None)
     await state.set_state(EditAcceptedState.confirm)
     await sendel_msg(
@@ -60,8 +59,7 @@ async def throw_order_confirm(call: types.CallbackQuery, state: FSMContext):
     
 @router.callback_query(EditAcceptedState.ready, F.data == "confirm")
 async def order_get_ready_confirm(call: types.CallbackQuery, state: FSMContext):
-    order = (await state.get_data())['order']
-    _id = order['id']
+    _id = (await state.get_data())['order'].id
     BotDB.finish_order(_id)
     await state.set_state(EditAcceptedState.confirm)
     await sendel_msg(

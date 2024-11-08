@@ -3,6 +3,7 @@ import datetime
 import pytz
 
 from bot_logger import logger
+from plugins.BotClasses import User, Order
 
 class MyDatabase:
     
@@ -80,7 +81,23 @@ class MyDatabase:
         "exec_id": order[4],
         "ready": order[5]
         }
-  
+        
+        
+    def _order_to_class(self, lst):
+        order = Order()
+        print(lst)
+        print(len(lst))
+        order.put_data(lst)
+        return order
+        
+        
+    def _user_to_class(self, lst):
+        user = User()
+        print("User:")
+        print(lst)
+        print(len(lst))
+        user.put_data(lst)
+        return user
         
     # system   
     def _connect(self):
@@ -148,7 +165,7 @@ class MyDatabase:
         ''', (telegram_id,))
         user = self._cursor.fetchone()
         self._disconnect()
-        return self._user_to_dict(user) if user else None
+        return self._user_to_class(user) if user else None
 
 
     def get_order(self, order_id):
@@ -158,7 +175,7 @@ class MyDatabase:
         ''', (order_id,))
         order = self._cursor.fetchone()
         self._disconnect()
-        return self._order_to_dict(order) if order else None
+        return self._order_to_class(order) if order else None
         
         
     def get_all_users(self):
@@ -168,7 +185,7 @@ class MyDatabase:
         ''')
         users = self._cursor.fetchall()
         self._disconnect()
-        return [self._user_to_dict(user) for user in users] if len(users) != 0 else None
+        return [self._user_to_class(user) for user in users] if len(users) != 0 else None
 
     
     def get_all_orders(self):
@@ -178,7 +195,7 @@ class MyDatabase:
         ''')
         orders = self._cursor.fetchall()
         self._disconnect()
-        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        return [self._order_to_class(order) for order in orders] if len(orders) != 0 else None
 
   
     def get_orders_by_user(self, telegram_id):
@@ -187,7 +204,7 @@ class MyDatabase:
             SELECT * FROM Orders WHERE telegram_id = ?''', (telegram_id,))
         orders = self._cursor.fetchall()
         self._disconnect()
-        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        return [self._order_to_class(order) for order in orders] if len(orders) != 0 else None
         
     #функция для удаления пользователя
     def delete_user(self, telegram_id):
@@ -230,7 +247,7 @@ class MyDatabase:
         ''')
         orders = self._cursor.fetchall()
         self._disconnect()
-        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        return [self._order_to_class(order) for order in orders] if len(orders) != 0 else None
 
     #возвращает готовые заказы
     def get_finished_orders(self):
@@ -240,7 +257,7 @@ class MyDatabase:
         ''')
         orders = self._cursor.fetchall()
         self._disconnect()
-        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        return [self._order_to_class(order) for order in orders] if len(orders) != 0 else None
         
         
     def finish_order(self, order_id):
@@ -254,7 +271,7 @@ class MyDatabase:
         ''', (user_id,))
         orders = self._cursor.fetchall()
         self._disconnect()
-        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        return [self._order_to_class(order) for order in orders] if len(orders) != 0 else None
         
     #функция возвращает заказы без исполнителя
     def get_not_picked_orders(self):
@@ -265,7 +282,7 @@ class MyDatabase:
         orders = self._cursor.fetchall()
         logger.info(orders)
         self._disconnect()
-        return [self._order_to_dict(order) for order in orders] if len(orders) != 0 else None
+        return [self._order_to_class(order) for order in orders] if len(orders) != 0 else None
         
     #функция для сохранения исполнителя для заказа
     def set_picked_order(self, order_id, user_id):

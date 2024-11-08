@@ -6,6 +6,6 @@ from aiogram.fsm.context import FSMContext
 from text import user_formatter, pre_texts, stickers
 
 from db_bot import BotDB
-from plugins.p_message import sendel_msg
+from plugins.message import sendel_msg
 from keyboards.inline_kb import bot_ikb
 from bot_logger import logger

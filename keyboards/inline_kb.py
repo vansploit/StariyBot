@@ -11,6 +11,7 @@ class BotInlineKB:
         self.admin_panel = self._get_admin_panel()
         self.admin_users = self._get_admin_users()
         self.confirm = self._get_confirm()
+        self.hide_button = self._get_hide_button()
         
         
     def _get_start_kb(self):
@@ -106,6 +107,15 @@ class BotInlineKB:
         builder.attach(InlineKeyboardBuilder.from_markup(self.exit))
         builder.adjust(2, 2, 1)
         return builder.as_markup()
+        
+        
+    def _get_hide_button(self):
+        builder = InlineKeyboardBuilder()
+        builder.button(text="Скрыть", callback_data="hide")
+        builder.button(text="Отказаться от исполнителя", callback_data="refuse_exec")
+        
+        builder.adjust(1, 1)
+        return builder.as_markup(resize_keyboard=True)
         
         
 bot_ikb = BotInlineKB(logger)   

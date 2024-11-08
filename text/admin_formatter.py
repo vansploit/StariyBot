@@ -1,4 +1,4 @@
-def user(lst):
+def user(order):
     result = (
         "📌Пользователь #{id}"
         "👤Телеграм id: {tg_id}"
@@ -11,15 +11,15 @@ def user(lst):
         "⭐Рейтинг: {rating}"
         "💳Данные для перевода: {transfer_details}"
         ).format(
-    id = lst['id'],
-    tg_id = lst['tg_id'],
-    username = lst['username'],
-    nickname = lst['nickname'],
-    privilege = lst['privilege'],
-    banned = lst['banned'],
-    ban_time = lst['ban_time'],
-    ban_duration = lst['ban_duration'],
-    rating = lst['rating'],
-    transfer_details = lst['transfer_details'])
+    id = order.id,
+    tg_id = order.tg_id,
+    username = order.username,
+    nickname = order.nickname,
+    privilege = order.privilege,
+    banned = order.banned,
+    ban_time = order.ban_time,
+    ban_duration = order.ban_duration,
+    rating = order.rating,
+    transfer_details = order.transfer_details)
     
     return result

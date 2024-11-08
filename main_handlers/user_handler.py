@@ -15,7 +15,7 @@ def get_navigation_menu(orders, user_id):
     order = orders[0]
     answer = user_formatter.user_order(
                                 order,
-                                user['username'])
+                                user.username)
     stick = stickers.lst
     return user, order, answer, stick
 
@@ -74,7 +74,7 @@ async def accept_order_handler(call: types.CallbackQuery, state: FSMContext):
                         user = user)
         await state.set_state(AcceptOrderState.choose)
     else:
-        answer = pre_texts.no_orders
+        answer = pre_texts.no_available_orders
         menu = bot_ikb.exit
         stick = stickers.no_exist
     await sendel_msg(call, answer, menu, stick)
@@ -120,3 +120,14 @@ async def get_accepted_orders(call: types.CallbackQuery, state: FSMContext):
 async def accepted_order_cancel_back(call: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await get_accepted_orders(call, state)
+    
+    
+@router.callback_query(F.data == "hide")
+async def hide_handler(call: types.CallbackQuery):
+    await call.answer('Состояние заказа в "мои заказы"')
+    await call.message.delete()
+    
+    
+@router.callback_query(F.data == "refuse_exec")
+async def refuse_exec_handler(call: types.CallbackQuery):
+    await call.answer()

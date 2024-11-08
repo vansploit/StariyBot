@@ -19,7 +19,7 @@ async def accept_navigate_orders(call: types.CallbackQuery, state: FSMContext):
         
     order = orders[cur_ord_id]
     await state.update_data(order = order)
-    answer = user_formatter.user_order(order, user['username'])
+    answer = user_formatter.user_order(order, user.username)
     await state.update_data(current_order_id = cur_ord_id)
     await call.message.edit_text(answer, parse_mode="HTML", reply_markup=menu)
     
@@ -37,10 +37,15 @@ async def accept_order(call: types.CallbackQuery, state: FSMContext):
 @router.callback_query(AcceptOrderState.confirm, F.data == "confirm")
 async def confirm_accept_order(call: types.CallbackQuery, state: FSMContext):
     order = (await state.get_data())['order']
-    BotDB.set_picked_order(order['id'], call.from_user.id)
+    BotDB.set_picked_order(order.id, call.from_user.id)
+    user = BotDB.get_user(call.from_user.id)
+    await bot.send_message(
+                           order.tg_id,
+                           f"Ваш заказ №{order.id} принял @{user.username}",
+                           reply_markup=bot_ikb.hide_button)
     await state.set_state(AcceptOrderState.ready)
     await sendel_msg(
                      call,
-                     f"Вы успешно приняли заказ №{order['id']}",
+                     f"Вы успешно приняли заказ №{order.id}",
                      bot_ikb.back,
                      stickers.confirm)

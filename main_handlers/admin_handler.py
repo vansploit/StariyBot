@@ -20,13 +20,13 @@ async def adm_orders_list(call: types.CallbackQuery):
     answer = ""
     if len(orders) > 0:
         for order in orders:        
-            username = BotDB.get_user(tg_id = order['tg_id'])['username']
-            username = hlink(username, f'tg://user?id='+str(order['tg_id']))
-            answer += f"📌Заказ #{order['id']}\n👤Пользователь {username}\n"
-            for i in order['order_list'].split('/'):
+            username = BotDB.get_user(tg_id = order.tg_id).username
+            username = hlink(username, f'tg://user?id='+str(order.tg_id))
+            answer += f"📌Заказ #{order.id}\n👤Пользователь {username}\n"
+            for i in order.order_list.split('/'):
                 answer += f"    🔹{i}\n"
-            answer += f"🗣️ Исполнитель {order['exec_id']}\n"
-            answer += f"⏰{order['time']}\n\n"
+            answer += f"🗣️ Исполнитель {order.exec_id}\n"
+            answer += f"⏰{order.time}\n\n"
     else:
         answer = pre_texts.no_orders
     await sendel_msg(call, answer, bot_ikb.exit)

@@ -1,7 +1,7 @@
 import asyncio
-from aiogram import Bot, Dispatcher
+from aiogram import Dispatcher
 
-import config
+from config import bot
 from main_handlers import main_handler, admin_handler, user_handler
 
 from bot_logger import logger
@@ -11,7 +11,7 @@ logger.info("Бот запускается...")
 # Запуск бота
 async def main():
     
-    bot = Bot(token = config.TOKEN)
+    
     dp = Dispatcher()
 
     dp.include_routers(
